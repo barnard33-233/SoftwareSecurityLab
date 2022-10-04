@@ -1,0 +1,5 @@
+#include "sector.h"
+
+int main(){
+    return 0;
+}
