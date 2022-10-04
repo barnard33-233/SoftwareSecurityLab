@@ -23,7 +23,7 @@
 找文件：
 
 1. 读`DBR`（构建数据结构）
-   1. 构建`struct DBR`
+   1. 构建`struct BPB`
    2. 算出来根目录首簇号
 2. 找到`FAT1`表扇区号
 3. 处理文件路径（为了简单这里可以先假定文件在根目录。），返回目标文件短文件名目录项(同时要完成目录项的解析)。
@@ -34,12 +34,14 @@
 
 ### 数据结构
 
+tip: 考虑到不同编译器对结构体和位段在内存中实际存储方式的处理不一样，建议还是挨个读一遍重新构建一下结构体
+
 1. 扇区 (便于跨平台)
 
    ```c
    struct Sector{
    	unsigned long read_pos;
-   	char * data;
+   	char data[SECTOR_SIZE];
    };
    ```
 
@@ -80,4 +82,16 @@
 6. 目录栈（处理文件路径用，暂时不是很重要）
 
 
+### 接口
 
+1. 扇区
+
+`... initReadSector(...)` 程序开始时调用。处理与操作系统相关的操作，获取磁盘文件或者句柄用，使读扇区尽量对上层隐藏平台信息。
+
+`int ReadSector(uint64_t read_pos, struct Sector * sector)`
+
+`... ExitReadSector(...)` 程序结束后调用
+
+## 文件
+
+main in `fat32-parser.c`
