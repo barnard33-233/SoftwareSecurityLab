@@ -95,3 +95,8 @@ tip: 考虑到不同编译器对结构体和位段在内存中实际存储方式
 ## 文件
 
 main in `fat32-parser.c`
+
+## 编译
+
+Linux 下： `make -f Makefile.linux [options]`
+TODO: Windows
