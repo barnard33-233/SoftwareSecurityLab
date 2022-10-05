@@ -3,3 +3,4 @@
 **/build/*
 
 **/*-test.c
+fat32/before-add.sh
