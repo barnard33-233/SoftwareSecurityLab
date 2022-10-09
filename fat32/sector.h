@@ -1,3 +1,9 @@
+/*
+ * sector.h
+ * 实现从一个磁盘中读特定扇区的操作
+ */
+
+
 #ifndef _SECTOR_H
 #define _SECTOR_H
 
@@ -15,13 +21,23 @@ struct Sector{
     char data[SECTOR_SIZE];
 };
 
-// initReadSector
+
 int ReadSector(int sector_num, struct Sector * sector);
+/* Read a sector
+ * @ param sector_num 扇区号
+ * @ param sector 扇区结构体指针，用于存储读到的扇区的数据。需要预先分配内存
+ */
 void exitReadSector();
+/*
+ * 退出程序前调用。
+ */
 
 
 // implement:
 
+/*
+ * 16进制形式输出扇区数据
+ */
 void PrintSector(struct Sector * sector){
     
     printf("\nSector number: %d\n", sector->sector_num);
@@ -46,6 +62,9 @@ void PrintSector(struct Sector * sector){
 // run in root privelege
 
 void initReadSector(char* disk_path);
+/*
+ * 程序开始时调用
+ */
 
 FILE * disk_fp;
 

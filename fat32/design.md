@@ -46,6 +46,7 @@ tip: 考虑到不同编译器对结构体和位段在内存中实际存储方式
    ```
 
 3. BPB
+   一些BPB中的重要字段(暂时不实现解析全部内容)
    ```c
    struct BPB{
        unsigned short byte_per_sector; // 每扇区字节数
