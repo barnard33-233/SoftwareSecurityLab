@@ -31,11 +31,12 @@ $(BUILD_D)%.o: $(SRC_D)%.c
 .PHONY: clean clean-img virtual.img
 
 clean:
-	-rm ./build/*.exe ./build/*.o ./*.txt
+	-rm ./build/*.exe ./build/*.o
 
 clean-img:
 	-rm ./virtual.img
 	-rm -rf ./mnt
+	-rm ./*.txt
 
 # make a disk image
 
@@ -56,6 +57,12 @@ virtual.img:
 
 # test:
 
+.PHONY: easy-test
+easy-test:
+	make clean-img
+	make virtual.img
+	./build/fat32-parser -o ./out.txt -i ./virtual.img -p random.txt
+	diff random.txt out.txt
 # TODO
 
 

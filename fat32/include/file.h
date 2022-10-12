@@ -36,14 +36,14 @@ struct SFNEntry{
 
 struct LFNEntry{
   uint8 attr;
-  uint8 name_1[10]; // 1--5
+  uint16 name_1[5]; // 1--5
   // 0xb:
   uint8 sign;
   uint8 reserved;
   uint8 check;
-  uint8 name_2[12]; // 6--11
+  uint16 name_2[6]; // 6--11
   uint16 first_clus;
-  uint8 name_3[4]; // 12--13
+  uint16 name_3[2]; // 12--13
 };
 
 uint32 ClusterNum2SectorNum(struct DBR_info bpb, uint32 cluster_num);

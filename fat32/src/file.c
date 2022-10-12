@@ -122,12 +122,11 @@ buildFNE(uint8 * data, int boundary, struct SFNEntry * sfn, struct LFNEntry** lf
   return 0;
 }
 
-static inline char* buildFileName(struct LFNEntry* lfn){
-  char * name = malloc(27*sizeof(char));
+static inline uint16* buildFileName(struct LFNEntry* lfn){
+  uint16 * name = malloc(14*sizeof(uint16));
   memcpy(name, lfn->name_1, 10);
-  memcpy(name + 10, lfn->name_2, 12);
-  memcpy(name + 22, lfn->name_3, 4);
-  name[26] = '\0';
+  memcpy(name + 5, lfn->name_2, 12);
+  memcpy(name + 11, lfn->name_3, 4);
   return name;
 }
 
@@ -155,28 +154,41 @@ struct SFNEntry traverseRoot(uint8 * data, int sector_cnt, struct Filename targe
     buildFNE(data + i * 32, fne_cnt - i, &sfn, &lfn_list, &cnt_lfn);
     
     // DEBUG:
-    printSFN(sfn);
+    // printSFN(sfn);
     
-    struct Filename this_filename;
     if(cnt_lfn == 0) { // no lfn
+      struct Filename this_filename;
+      Uppercase(target.ext, strlen(target.ext));
+      Uppercase(target.name, strlen(target.name));
       this_filename.name = sfn.file_name;
       this_filename.ext = sfn.ext_name;
+      if(strncmp(this_filename.ext, target.ext, strlen(target.ext)) == 0 &&
+        strncmp(this_filename.name, target.name, strlen(target.name)) == 0) {
+        return sfn;
+      }
     }
     else{ // have lfn
-      char * filename = malloc(1 + 26 * cnt_lfn);
+      struct Filename16 this_filename;
+      uint16 * filename = malloc((1 + 13 * cnt_lfn) * sizeof(uint16));
       for(int i = 0; i < cnt_lfn; i++){
-        char * name = buildFileName(lfn_list + cnt_lfn - i - 1);
+        uint16 * name = buildFileName(lfn_list + cnt_lfn - i - 1);
         memcpy(filename + i * 26, name, 26);
       }
-      filename[26 * cnt_lfn] = '\0';
+      filename[13 * cnt_lfn] = 0;
       
-      this_filename = cutFilename(filename);
+      this_filename = cutFilename16(filename, 13 * cnt_lfn * sizeof(uint16));
+
+      struct Filename16 target16;
+      target16.ext = char2wchar(target.ext, strlen(target.ext));
+      target16.ext_len = strlen(target.ext);
+      target16.name = char2wchar(target.name, strlen(target.name));
+      target16.name_len = strlen(target.name);
+      if(wcharncmp(this_filename.name, target16.name, 13) == 0){
+          return sfn;
+      }
+
     }
     
-    if(strncmp(this_filename.ext, target.ext, strlen(target.ext)) == 0 &&
-      strncmp(this_filename.name, target.name, strlen(target.name)) == 0) {
-      return sfn;
-    }
     i += (cnt_lfn + 1);
   }
   struct SFNEntry nothing;
@@ -187,10 +199,22 @@ struct SFNEntry traverseRoot(uint8 * data, int sector_cnt, struct Filename targe
 // uint32 traverseDict(uint8 * data, char* dest){
 
 // }
+static inline void dispClusChain(struct DBR_info bpb, struct Cluster * clus_chain){
+  printf("## cluster chain:");
+  struct Cluster * ptr = clus_chain;
+  while(ptr != NULL){
+    printf("cluster number:%x\n", ptr->cluster_no);
+    // uint32 sectornum = ClusterNum2SectorNum(bpb, ptr->cluster_no);
+    // printf("sectornum:%x\n", sectornum);
+    ptr = ptr->next_cluster;
+  }
+  printf("\n");
+}
 
 int copyFile(struct DBR_info bpb, struct SFNEntry sfn, char * dest){
   uint32 clus_num = (uint32)(sfn.clus_no_low) + ((uint32)(sfn.clus_no_high) << 16);
   struct Cluster * clus_chain = getClusterChain(bpb, clus_num);
+  dispClusChain(bpb, clus_chain);
 
   FILE* dest_fp = fopen(dest, "wb");
   if(dest_fp == NULL){

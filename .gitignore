@@ -3,5 +3,6 @@
 **/build/*
 **/*img
 **/.swp
+**/link/
 
 **/*-test.c
