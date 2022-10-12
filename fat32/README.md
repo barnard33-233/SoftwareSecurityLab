@@ -19,3 +19,11 @@
 
 ## 编译
 
+## usage
+
+TODO:
+1. -r /path/to/root/
+2. -p /path/to/file
+3. -P /relative/path/to/file
+4. -i /path/to/disk/file
+5. -n disk_number
