@@ -1,5 +1,7 @@
 **/.vscode
 **/.idea
 **/build/*
+**/*img
+**/.swp
 
 **/*-test.c
