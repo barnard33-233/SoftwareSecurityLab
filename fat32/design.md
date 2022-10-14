@@ -102,22 +102,5 @@ main in `fat32-parser.c`
 Linux 下： `make -f Makefile.linux [options]`
 TODO: Windows
 
-## 平台和环境
 
-+ 操作系统 Linux (测试环境 manjaro, ubuntu 22.04)
-+ 编译器 gcc(12.2.0)
-+ 利用make编译
-
-## 编译与测试
-
-1. 在`build/`文件夹下编译生成`fat32-parser`
-
-```bash
-make
-```
-
-2. 生成随机文件和fat32镜像并测试
-```
-make easy-test
-```
 ## release

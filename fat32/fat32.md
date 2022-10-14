@@ -1,9 +1,3 @@
----
-CJKmainfont: Source Han Serif CN
-data: 2022.09.26
-documentclass: article
-geometry: margin=3cm
----
 # 武汉大学国家网络安全学院教学实验报告
 
 |   课程名称   |  软件安全实验  |   实验日期   | 2022.10.12 |
@@ -157,7 +151,68 @@ WinHex 20.6 SR-1
 
 ### 内容二
 
-- 读取数据所使用的数据结构
+#### 基本信息
+
++ 平台与环境
+  + 操作系统 Linux (测试环境 manjaro, ubuntu 22.04)
+  + 编译器 gcc(12.2.0)
+  + 利用make编译
+
++ 编译与测试
+  1. 在`build/`文件夹下编译生成`fat32-parser`
+
+  ```bash
+  make
+  ```
+
+  2. 生成随机文件和fat32镜像并测试
+
+  ```bash
+  make easy-test
+  ```
+
++ 二进制文件： `release/fat32-parser`
+
++ 使用说明：
+  1. -p /path/to/file
+  2. -i /path/to/disk/file
+  3. -o /path/to/output
+
++ 实现效果： 可以读取文件系统根目录下的文件(更深的目录结构未实现)
+
+#### 实验思路
+
+1. 实现读取磁盘数据。在 Linux 下， `/dev` 文件夹中包含了所有外部设备，可以直接通过 `fopen` 打开并用 `fread` 读取。
+2. 解析 DBR，获取 保留扇区数， FAT个数，FAT大小，根目录首簇号等重要信息
+3. 从FAT1中读取根目录的信息，获取根目录簇链
+4. 解析文件名目录项，获取文件首簇
+5. 获取文件簇链，写入目标文件
+
+#### 文件结构与说明
+
+重要文件：
++ src/sector.c
+  
+  磁盘数据读取的相关实现
++ src/DBR.c
+  
+  DBR扇区数据解析实现
++ src/file.c
+
+  获取簇链，解析文件名目录项的相关实现
++ src/fat32-parser.c
+
+  main函数，命令行参数解析相关实现
+
+重要函数
+
+1. `parseInput` 解析命令行参数
+2. `ReadSector` 读取给定扇区号的数据
+3. `parseBPB`: 解析DBR
+4. `getClusterChain` 获取簇链
+5. `traverseRoot`：遍历根目录，寻找目标文件
+
+读取数据所使用的数据结构
 
 ```c
 //扇区
@@ -182,7 +237,47 @@ struct Cluster{
   unsigned long cluster_no;
   struct Cluster * next_cluster;
   }
+
+
+struct SFNEntry{
+  uint8 file_name[8];
+  uint8 ext_name[3];
+  // 0xb:
+  uint8 attr;
+  uint8 reserved;
+  uint8 create_t_ms;
+  uint16 create_t;
+  uint16 create_date;
+  uint16 visit_date;
+  uint16 clus_no_high;
+  uint16 modify_t;
+  uint16 modify_date;
+  uint16 clus_no_low;
+  uint32 file_len;
+};
+
+struct LFNEntry{
+  uint8 attr;
+  uint16 name_1[5]; // 1--5
+  // 0xb:
+  uint8 sign;
+  uint8 reserved;
+  uint8 check;
+  uint16 name_2[6]; // 6--11
+  uint16 first_clus;
+  uint16 name_3[2]; // 12--13
+};
 ```
+
+#### 实验结果及改进
+
+![](./pictures/Screenshot_20221012_235058.png)
+
+diff指令无输出，说明输出文件与原文件一致，试验结果符合预期
+
+改进方向：
+1. 多层目录的查找的实现
+2. 移植到Windows等平台
 
 ## 实验结果总结与故障记录
 

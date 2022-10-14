@@ -3,6 +3,8 @@
 **/build/*
 **/*img
 **/.swp
-**/link/
+**/*.zip
+**/*.pdf
+**/release/*
 
 **/*-test.c
