@@ -1,6 +1,8 @@
 **/.vscode
 **/.idea
+**/.vs
 **/build/*
+**/build-*/*
 **/*img
 **/.swp
 **/*.zip

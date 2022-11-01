@@ -1,5 +1,18 @@
 # design
 
+## 流程
+
+1. 要修改的地方
+
+头：
+NumberOfSections, 
+AddressOfEntryPoint, 
+SizeOfImage
+
+节表
+
+新节
+
 ## 任务分解
 
 TODO
@@ -15,12 +28,9 @@ TODO
 3. 载荷
 
 
-## 接口说明
+## 说明
 
 除了最开始规定好的，其他的对接口的必要说明要写在这里
 
-## lmh only
+get_api: 获取相关外部api的地址
 
-关于Windows虚拟机
-
-Win7 msvc 编译器

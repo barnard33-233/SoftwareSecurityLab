@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <Windows.h>
 
-char injection[] = "";
+#include "type.h"
+#include "pe.h"
+#include "infect.h"
 
-int main(){
-  // jzy's works
-  // adjust injected code
+u8 injection[] = "infected";
+u8 * file;
 
-  // add new section table
 
-  // add new section
-
-  // change AddressOfEntryPoint
-  return 0;
-}
+// int infect(u8 injection, HANDLE file_handle){
+    
+// }
