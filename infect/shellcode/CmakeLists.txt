@@ -1,3 +1,4 @@
+# cmake -S /path/to/this/folder/ -A Win32 -B "build_shellcode1"
 cmake_minimum_required(VERSION 3.24)
 
 project(shellcode1)
@@ -8,6 +9,5 @@ add_executable(shellcode1 shellcode1.c)
 
 target_include_directories(
     shellcode1
-    PRIVATE ${PROJECT_SOURCE_DIR}/../../include/
+    PRIVATE ${PROJECT_SOURCE_DIR}/../include/
 )
-# cmake -DCMAKE_GENERATOR_PLATFORM=Win32 /path/to/this/folder
