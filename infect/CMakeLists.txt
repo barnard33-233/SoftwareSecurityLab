@@ -4,9 +4,7 @@ project (virus)
 
 set(SOURCES 
     src/virus.c 
-    src/get_api.c
     src/infect.c
-    src/inject.c
     src/parse.c
 )
 

