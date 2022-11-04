@@ -12,9 +12,13 @@ f = open(fname, "rb")
 content = bytes(f.read())
 content_len = len(content)
 print("char injection[{} + 1] = {{".format(content_len))
+cnt = 0
 for byte in content:
+    if byte == 0xc3:
+        break
     print("\'\\x{:02x}\'".format(byte), end=",")
+    cnt += 1
 print("0\n};")
-
+print("const int INJECTION_SIZE_RAW = {};".format(cnt))
 f.close()
 

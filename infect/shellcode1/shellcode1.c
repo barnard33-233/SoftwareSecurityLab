@@ -7,6 +7,7 @@
 //----------config----------
 #pragma section(".shllcd", read, execute)
 #pragma code_seg(".shllcd")
+#pragma comment(linker, "/entry:shellcode")
 //----------debug-----------
 #ifndef NDEBUG
 #include <stdio.h>
@@ -112,7 +113,6 @@ PVOID get_api(PVOID dll_base, CHAR* api_name, int api_name_len){
 
 
 //entry:
-__declspec(dllexport)
 void shellcode(){
     PVOID base = get_dll(kernel32_dll_name, KERNEL32_NAME_LEN);
     INFO("base: %p\n", base);
@@ -139,7 +139,7 @@ void shellcode(){
     int ret = fn_WriteFile(
         fh,
         data,
-        10,
+        13,
         &size_written,
         NULL
     );
@@ -148,14 +148,14 @@ void shellcode(){
 }
 
 //----------debug----------
-#ifndef NDEBUG
+# pragma code_seg(push, r1, ".text")
 int main(){
     INFO("start test\n");
     shellcode();
     INFO("End test\n");
     return 0;
 }
-#endif
+# pragma code_seg(pop, r1)
 
 #define IN_THIS_SEC __declspec(allocate(".shllcd"))
 

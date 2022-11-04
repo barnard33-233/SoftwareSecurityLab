@@ -11,7 +11,12 @@
 **/release/*
 
 **/*.o
+**/*.dll
+**/*.lib
 **/*.obj
 **/*.bin
+**/*.exe
 
 **/*-test.c
+
+**/victim/*

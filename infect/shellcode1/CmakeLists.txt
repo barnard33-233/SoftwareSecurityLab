@@ -3,9 +3,11 @@ cmake_minimum_required(VERSION 3.24)
 
 project(shellcode1)
 
-add_compile_options(/Ob2 /c /Gs-)
+add_compile_options(/Ob3 /c /Gs- /DNDEBUG)
 
 add_executable(shellcode1 shellcode1.c)
+# add_library(shellcode1 SHARED shellcode1.c)
+# install(TARGETS shellcode1)
 
 target_include_directories(
     shellcode1

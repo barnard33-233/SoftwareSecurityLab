@@ -7,6 +7,7 @@ set(SOURCES
     virus.c 
     infect.c
     parse.c
+    code.c
 )
 
 add_executable(virus ${SOURCES})

