@@ -14,8 +14,6 @@ content_len = len(content)
 print("char injection[{} + 1] = {{".format(content_len))
 cnt = 0
 for byte in content:
-    if byte == 0xc3:
-        break
     print("\'\\x{:02x}\'".format(byte), end=",")
     cnt += 1
 print("0\n};")

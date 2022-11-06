@@ -17,24 +17,24 @@ IMAGE_SECTION_HEADER * p_section_headers;
 DWORD image_base;
 DWORD number_of_sections;
 
-// DWORD rva2fov(DWORD rva){
-//     int num;
-//     if(rva < p_section_headers[0].VirtualAddress){
-//         return rva;
-//     }
-//     for(num = 0; num < number_of_sections; num++){
-//         if(rva < p_section_headers[num].VirtualAddress){
-//             break;
-//         }
-//     }
-//     num--;
-//     INFO("\tnum: %d\n", num);
-//     int off = rva - p_section_headers[num].VirtualAddress;
-//     INFO("\toff: %x\n", off);
-//     int fov = off + p_section_headers[num].PointerToRawData;
-//     INFO("\t%x, %x, %x\n", off, p_section_headers[num].PointerToRawData, fov);
-//     return fov;
-// }
+DWORD rva2fov(DWORD rva){
+    int num;
+    if(rva < p_section_headers[0].VirtualAddress){
+        return rva;
+    }
+    for(num = 0; num < number_of_sections; num++){
+        if(rva < p_section_headers[num].VirtualAddress){
+            break;
+        }
+    }
+    num--;
+    INFO("\tnum: %d\n", num);
+    int off = rva - p_section_headers[num].VirtualAddress;
+    INFO("\toff: %x\n", off);
+    int fov = off + p_section_headers[num].PointerToRawData;
+    INFO("\t%x, %x, %x\n", off, p_section_headers[num].PointerToRawData, fov);
+    return fov;
+}
 
 int get_sec(char * pe_file, char* section, int * off, char ** buffer, int* size){
     char * _buffer;
@@ -57,14 +57,14 @@ int get_sec(char * pe_file, char* section, int * off, char ** buffer, int* size)
     }
 #endif
 
-    // DWORD export_table_rva = p_nt_header->OptionalHeader.DataDirectory[0].VirtualAddress;
-    // IMAGE_EXPORT_DIRECTORY* p_export_table = pe_file + rva2fov(export_table_rva);
-    // DWORD export_entry_rva = p_export_table->AddressOfFunctions;
-    // INFO("rva: 0x%x\n", export_entry_rva);
-    // DWORD export_entry_fov = rva2fov(export_entry_rva);
-    // INFO("fov: 0x%x\n", export_entry_fov);
-    // DWORD* p_export_entry = pe_file + export_entry_fov;
-    int address_of_entry_point = p_nt_header->OptionalHeader.AddressOfEntryPoint;
+    DWORD export_table_rva = p_nt_header->OptionalHeader.DataDirectory[0].VirtualAddress;
+    IMAGE_EXPORT_DIRECTORY* p_export_table = pe_file + rva2fov(export_table_rva);
+    DWORD export_entry_rva = p_export_table->AddressOfFunctions;
+    INFO("rva: 0x%x\n", export_entry_rva);
+    DWORD export_entry_fov = rva2fov(export_entry_rva);
+    INFO("fov: 0x%x\n", export_entry_fov);
+    DWORD* p_export_entry = pe_file + export_entry_fov;
+    // int address_of_entry_point = p_nt_header->OptionalHeader.AddressOfEntryPoint;
 
 
     for(int i = 0; i < number_of_sections; i++){
@@ -80,7 +80,8 @@ int get_sec(char * pe_file, char* section, int * off, char ** buffer, int* size)
 
             // find entry
             *size = p_section_headers[i].Misc.VirtualSize;
-            *off = address_of_entry_point - p_section_headers[i].VirtualAddress;
+            // *off = address_of_entry_point - p_section_headers[i].VirtualAddress;
+            *off = p_export_entry[0] - p_section_headers[i].VirtualAddress;
             *buffer = _buffer;
             return 0;
         }

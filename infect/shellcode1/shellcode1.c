@@ -5,10 +5,9 @@
 #include <assert.h>
 
 //----------config----------
-#pragma section(".shllcd", read, execute)
 #pragma code_seg(".shllcd")
-#pragma comment(linker, "/entry:shellcode")
 //----------debug-----------
+#define NDEBUG
 #ifndef NDEBUG
 #include <stdio.h>
 #define INFO(...) printf(__VA_ARGS__)
@@ -18,20 +17,20 @@
 
 //
 #define KERNEL32_NAME_LEN 12
-extern WCHAR kernel32_dll_name[KERNEL32_NAME_LEN + 1];
+// extern WCHAR kernel32_dll_name[KERNEL32_NAME_LEN + 1];
 
 #define CREATEFILEA_NAME_LEN 11
-extern char createfilea_name[CREATEFILEA_NAME_LEN + 1];
+// extern char createfilea_name[CREATEFILEA_NAME_LEN + 1];
 #define WRITEFILE_NAME_LEN 9
-extern char writefile_name[WRITEFILE_NAME_LEN + 1];
+// extern char writefile_name[WRITEFILE_NAME_LEN + 1];
 #define READFILE_NAME_LEN 8
-extern char readfile_name[READFILE_NAME_LEN + 1];
+// extern char readfile_name[READFILE_NAME_LEN + 1];
 
 #define MAX_BUFFER_SIZE 1024
-extern char data[MAX_BUFFER_SIZE];
+// extern char data[MAX_BUFFER_SIZE];
 
 
-extern char target_file[];
+// extern char target_file[];
 
 
 
@@ -113,7 +112,17 @@ PVOID get_api(PVOID dll_base, CHAR* api_name, int api_name_len){
 
 
 //entry:
+__declspec(dllexport)
 void shellcode(){
+    WCHAR kernel32_dll_name[KERNEL32_NAME_LEN + 1] = {
+        L'K', L'E', L'R', L'N', L'E', L'L', L'3', L'2', L'.', L'D', L'L', L'L', L'\0'
+    };
+
+    char createfilea_name[CREATEFILEA_NAME_LEN + 1] = {'C','r','e','a','t','e','F','i','l','e','A',0};
+    char writefile_name[WRITEFILE_NAME_LEN + 1] = {'W','r','i','t','e','F','i','l','e',0};
+    char readfile_name[READFILE_NAME_LEN + 1] = {'R','e','a','d','F','i','l','e',0};
+    char target_file[10] = {'.','\\','n','e','w','.','t','x','t',0};
+    char data[14] = {'2','0','2','0','3','0','2','1','8','1','0','2','1',0};
     PVOID base = get_dll(kernel32_dll_name, KERNEL32_NAME_LEN);
     INFO("base: %p\n", base);
     
@@ -155,18 +164,3 @@ int main(){
     INFO("End test\n");
     return 0;
 }
-# pragma code_seg(pop, r1)
-
-#define IN_THIS_SEC __declspec(allocate(".shllcd"))
-
-//----------global vars------------
-
-IN_THIS_SEC WCHAR kernel32_dll_name[] = {
-    L'K', L'E', L'R', L'N', L'E', L'L', L'3', L'2', L'.', L'D', L'L', L'L', L'\0'
-};
-
-IN_THIS_SEC char createfilea_name[] = {'C','r','e','a','t','e','F','i','l','e','A',0};
-IN_THIS_SEC char writefile_name[] = {'W','r','i','t','e','F','i','l','e',0};
-IN_THIS_SEC char readfile_name[] = {'R','e','a','d','F','i','l','e',0};
-IN_THIS_SEC char target_file[] = {'.','\\','n','e','w','.','t','x','t',0};
-IN_THIS_SEC char data[MAX_BUFFER_SIZE] = {'2','0','2','0','3','0','2','1','8','1','0','2','1',0};
