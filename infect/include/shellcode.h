@@ -2,17 +2,10 @@
 #define __SHELLCODE_H
 
 #include <minwindef.h>
-typedef struct FuncTable{
-    void* fn;
-    char* name;
-}FuncTable;
+#include <fileapi.h>
+#include <heapapi.h>
 
-typedef struct DllTable{
-    WCHAR* name;
-    FuncTable fn_table[16];
-}DllTable;
-
-// ! 这里需要注意，因为 shellcode 在 32 位下编译，这里的函数使用的都不是stdcall
+// from fileapi.h
 
 typedef BOOL(WINAPI *fp_CloseHandle)(HANDLE);
 
@@ -41,4 +34,46 @@ typedef HANDLE (WINAPI * fp_CreateFileA)(
     _In_opt_ HANDLE hTemplateFile
     );
 
+typedef BOOL (WINAPI *fp_FindClose)(
+    _Inout_ HANDLE hFindFile
+    );
+
+typedef HANDLE (WINAPI * fp_FindFirstFileA)(
+    _In_ LPCSTR lpFileName,
+    _Out_ LPWIN32_FIND_DATAA lpFindFileData
+    );
+
+typedef BOOL (WINAPI * fp_FindNextFileA)(
+    _In_ HANDLE hFindFile,
+    _Out_ LPWIN32_FIND_DATAA lpFindFileData
+    );
+
+typedef BOOL (WINAPI *fp_GetFileSizeEx)(
+    _In_ HANDLE hFile,
+    _Out_ PLARGE_INTEGER lpFileSize
+    );
+
+typedef DWORD (WINAPI* fp_SetFilePointer)(
+    _In_ HANDLE hFile,
+    _In_ LONG lDistanceToMove,
+    _Inout_opt_ PLONG lpDistanceToMoveHigh,
+    _In_ DWORD dwMoveMethod
+    );
+
+typedef BOOL (WINAPI *fp_SetEndOfFile)(
+    _In_ HANDLE hFile
+    );
+
+
+
+// from heapapi.h
+typedef LPVOID (WINAPI * fp_HeapAlloc)(
+    _In_ HANDLE hHeap,
+    _In_ DWORD dwFlags,
+    _In_ SIZE_T dwBytes
+    );
+
+typedef HANDLE (WINAPI *fp_GetProcessHeap)(
+    VOID
+    );
 #endif

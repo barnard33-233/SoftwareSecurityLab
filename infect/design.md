@@ -53,6 +53,12 @@ devenv ./build_shellcode1/shellcode1.sln /build
 
 3. export_sections.c
 
+4. shellcode2
+
+```
+ cl /Ob3 /GS- /I../include .\shellcode2.c /link/subsystem:console
+```
+
 ## 使用
 
 1. virus
