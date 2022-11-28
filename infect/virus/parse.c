@@ -23,17 +23,14 @@ u32 section_tables_end_old;
 u32 sections_start;
 u32 sections_end_old;
 
-struct SectionHeader * section_headers; // FIXME: free this
+struct SectionHeader * section_headers;
 
 int parse(){
-    // TODO tell if the file is a pe file
     INFO("\tstart\n");
     NT_header_off = *(u32*)(file + DOS_HEADER__NT_HEADER_OFF);
     u32 file_header_off = NT_header_off + NT_HEADER__FILE_HEADER_OFF;
     u32 optional_header_off = NT_header_off + NT_HEADER__OPTIONAL_HEADER_OFF;
-    
     // TODO: check 'PE\0\0' lable
-
     number_of_sections_old = *(u16*)(file + file_header_off + FILE_HEADER__NUMBER_OF_SECTION_OFF);
     size_of_optional_header = *(u16*)(file + file_header_off + FILE_HEADER__SIZE_OF_OPTIONAL_HEADER); 
 

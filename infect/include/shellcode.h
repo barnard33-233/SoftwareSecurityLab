@@ -76,4 +76,10 @@ typedef LPVOID (WINAPI * fp_HeapAlloc)(
 typedef HANDLE (WINAPI *fp_GetProcessHeap)(
     VOID
     );
+// WinUser.h:
+typedef int (WINAPI *fp_MessageBoxA)(
+    _In_opt_ HWND hWnd,
+    _In_opt_ LPCSTR lpText,
+    _In_opt_ LPCSTR lpCaption,
+    _In_ UINT uType);
 #endif
